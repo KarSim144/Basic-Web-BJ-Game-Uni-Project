@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Cihaz uyumluluğu 1e 1-->
+
+    <title>Royal Crown Blackjack</title>
+   
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts 3 özel yazı tipi yükleniyor:
+         - Cinzel: Başlıklar ve logo için
+         - Playfair Display: Sayılar ve değerler için
+         - Montserrat: Genel metin için-->
+</head> 
+
+
+   <body>
+     <!--Kazanç animasyonun konteyneri-->
+      <!--Sadece blackjack için efekt var-->
+    <div class="coin-rain-container" id="coinRain"></div>
+     
+    <header class="casino-header">
+        <!--üst menü çubuğu -->
+        <div class="logo">
+            <span class="logo-crown">👑</span>
+            <span class="logo-text">Royal Crown Blackjack</span>
+        </div>
+          <!--logonun olduğı yer -->
+        <div class="header-stats">
+            <div class="stat-box"><div class="stat-label">Decks</div><div class="stat-value">6</div></div>
+            <div class="stat-box"><div class="stat-label">Cards</div><div class="stat-value" id="cardsLeft">312</div></div>
+            <div class="stat-box"><div class="stat-label">Min</div><div class="stat-value">$5</div></div>
+            <button class="sound-toggle" id="soundToggle">🔊</button>
+        </div>
+        <!--menü çubugunda sağ üstteki yer-->
+    </header>
+
+    <div class="main-layout">
+        <!--ana konteynir-->
+
+        <div class="side-panel">
+            <!--sol sutün ve butonları-->
+            <button class="side-btn deal" id="dealBtn" onclick="game.startRound()">Deal</button>
+            <button class="side-btn new-round" id="newRoundBtn" onclick="game.newRound()" style="display:none;">New Round</button>
+            <button class="side-btn reset" onclick="game.resetGame()">Reset</button>
+            <div class="keyboard-hints">
+                <h4>Keys</h4>
+                <div><kbd>1</kbd><span>Hit</span></div>
+                <div><kbd>2</kbd><span>Stand</span></div>
+                <div><kbd>3</kbd><span>Double</span></div>
+                <div><kbd>4</kbd><span>Split</span></div>
+            </div>
+        </div>
+
+
+        <div class="table-container">
+            <!--masa wrapperi-->
+            <div class="blackjack-table">
+                <!--masa-->
+                <div class="table-logo">Royal Crown</div>
+                <div class="table-rules">Blackjack 3:2 • Dealer Stands 17 • Insurance 2:1</div>
+                <div class="game-status" id="gameStatus">Place Your Bets</div>
+
+                <!--krupiyerin bölümü-->
+                <div class="dealer-section">
+                    <div class="dealer-label">Dealer</div>
+                    <div class="dealer-cards" id="dealerCards"></div>
+                    <!--kartların geldigi yer-->
+
+                    <div class="dealer-total-badge" id="dealerTotal" style="display:none;"></div>
+                    <!--kart toplamı yazan yer-->
+                </div>
+
+                <div class="players-arc" id="playersArea"></div>
+                <!--7 oyuncu alanı javascript dinamik element ekler 
+                Render.players fonksiyonu ile-->
+            </div>
+        </div>
+
+
+    </div>
+<script src="script.js"></script>
+
+</body>
+</html>
