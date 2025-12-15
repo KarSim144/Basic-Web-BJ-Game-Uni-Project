@@ -3,14 +3,14 @@
 const CONFIG = {
     SUITS: ['♠', '♥', '♦', '♣'],
     VALUES: ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
-    CHIP_VALUES: [5, 10, 25, 50, 100, 500, 5000],
+    CHIP_VALUES: [5, 10, 25, 50, 100, 500,],
     NUM_DECKS: 6,
     RESHUFFLE_THRESHOLD: 52, 
     //Kalan kart 52den azsa karıştır
     NUM_PLAYERS: 7,
     STARTING_CHIPS: 5000,
     MIN_BET: 5,
-    MAX_BET: 100000,
+    MAX_BET: 100000000000,
     BLACKJACK_PAYOUT: 1.5,
     INSURANCE_PAYOUT: 2,
     MAX_SPLIT_HANDS: 4,
@@ -216,7 +216,7 @@ const Effects = {
 };
 
 
-// Insurance Modal
+// Sigorta
 const InsModal = {
     players: [], idx: 0, cb: null,
     show(players, callback) {
@@ -241,7 +241,7 @@ const InsModal = {
     }
 };
 
-// Renderer
+// Render
 const Render = {
     card(c, hidden = false, isNew = false) {
         if (hidden) return `<div class="card card-back ${isNew ? 'dealing' : ''}"></div>`;
@@ -250,7 +250,8 @@ const Render = {
             <div class="card-corner"><span class="card-value">${c.value}</span><span class="card-suit-small">${c.suit}</span></div>
             <span class="card-suit-center">${c.suit}</span>
             <div class="card-corner bottom"><span class="card-value">${c.value}</span><span class="card-suit-small">${c.suit}</span></div></div>`;
-    },
+    },//Kart renderi
+
     dealerCards(dealer, hideHole = true) {
         const cont = document.getElementById('dealerCards'), badge = document.getElementById('dealerTotal');
         if (!dealer.hand.cards.length) { cont.innerHTML = ''; badge.style.display = 'none'; return; }
@@ -267,7 +268,7 @@ const Render = {
             }
         });
         cont.querySelectorAll('.card-wrapper').forEach((e, i) => e.style.marginLeft = i === 0 ? '0' : margin + 'px');
-
+        //Dealer kartları renderla
         if (hideHole && dealer.hand.cards.length >= 2) { badge.textContent = `Showing: ${Utils.cardValue(dealer.hand.cards[0])}`; badge.className = 'dealer-total-badge'; }
         else {
             const t = dealer.hand.total;
@@ -344,12 +345,33 @@ const Render = {
         return `<div class="hand-section">${splitLbl}<div class="player-cards-area">${cardsHtml}</div>
             <div class="player-info-bar">${h.cards.length ? `<span class="${tCls}">${tTxt}</span>` : '<span></span>'}<div>${badges}</div></div></div>`;
     },
-    bettingCtrl(p, idx) {
-        const chips = CONFIG.CHIP_VALUES.map(v => `<div class="chip chip-${v} ${p.chips < v ? 'disabled' : ''}" onclick="game.placeBet(${idx},${v})">${v}</div>`).join('');
-        return `<div class="betting-panel"><div class="chip-rack">${chips}</div>
-            <div class="bet-actions"><button class="bet-btn clear" onclick="game.clearBet(${idx})">Clear</button>
-            <button class="bet-btn rebet" onclick="game.rebet(${idx})" ${!p.lastBet || p.lastBet > p.chips ? 'disabled' : ''}>Rebet</button></div></div>`;
-    },
+bettingCtrl(p, idx) {
+    // Normal çipler arrayden geliyor
+    const chips = CONFIG.CHIP_VALUES.map(v => 
+        `<div class="chip chip-${v} ${p.chips < v ? 'disabled' : ''}" 
+              onclick="game.placeBet(${idx},${v})">${v}</div>`
+    ).join('');
+    
+    // tüm parayı at
+    const Yoloooo = p.chips > 0 ? 
+        `<div class="chip chip-all-in" 
+              onclick="game.placeBet(${idx}, ${p.chips})">
+            Max
+         </div>` : '';
+    
+    return `<div class="betting-panel">
+        <div class="chip-rack">
+            ${chips}
+            ${Yoloooo}
+        </div>
+        <div class="bet-actions">
+            <button class="bet-btn clear" onclick="game.clearBet(${idx})">Clear</button>
+            <button class="bet-btn rebet" onclick="game.rebet(${idx})" 
+                    ${!p.lastBet || p.lastBet > p.chips ? 'disabled' : ''}>Rebet</button>
+        </div>
+    </div>`;
+}, //Çiplerin oldugu arrayi tamamen dolasıp render ediyor
+
     actionCtrl(p, upCard) {
         const h = p.hand;
         const canHit = !h.standing && !h.busted && !(h.splitAces && h.cards.length >= 2);
@@ -408,7 +430,7 @@ class Game {
         this.status('Dealing...');
         this.render();
 
-        // Deal cards
+        // Kartları dağıt üstten
         for (let r = 0; r < 2; r++) {
             for (const p of this.players) if (p.hasBet) { p.hand.addCard(this.shoe.draw()); sound.play('card'); Render.players(this.players, -1, 'dealing', null); await Utils.delay(CONFIG.DEAL_DELAY); }
             this.dealer.hand.addCard(this.shoe.draw()); sound.play('card'); Render.dealerCards(this.dealer, true); await Utils.delay(CONFIG.DEAL_DELAY);
@@ -417,15 +439,14 @@ class Game {
         this.curIdx = this.players.findIndex(p => p.hasBet);
         const upCard = this.dealer.hand.cards[0];
 
-        // Insurance phase - ONLY when dealer shows Ace
-        // This is just a side bet - dealer does NOT peek at hole card
+      
         if (upCard.value === 'A') {
             this.phase = 'insurance';
             this.status('Dealer shows Ace - Insurance?'); 
             this.render(); 
             await Utils.delay(600);
             
-            // Offer insurance to all eligible players via modal
+            
             const eligiblePlayers = this.players.filter(p => p.hasBet && p.canInsurance(upCard));
             if (eligiblePlayers.length > 0) {
                 await new Promise(res => InsModal.show(this.players, res));
@@ -433,8 +454,7 @@ class Game {
             await Utils.delay(400);
         }
 
-        // Now begin regular play - dealer does NOT check for blackjack yet
-        // Players complete all their actions first
+     
         this.phase = 'playing';
         this.render(); 
         this.status(); 
@@ -503,13 +523,13 @@ class Game {
         let hasWin = false, hasBJ = false;
 
         for (const p of this.players) {
-            // Pay out insurance if dealer has blackjack
+            
             if (p.insurance > 0) {
                 if (dBJ) {
-                    // Insurance pays 2:1, so player gets back insurance bet + 2x insurance bet
+                   
                     p.chips += p.insurance * 3;
                 }
-                // If dealer doesn't have BJ, insurance is lost (already deducted)
+             
             }
             
             for (const h of p.hands) {
@@ -517,40 +537,40 @@ class Game {
                 const pt = h.total, pBJ = h.isBlackjack;
                 
                 if (h.busted) {
-                    // Player busted - always loses
+                  
                     h.result = 'loss';
                 } else if (dBJ) {
-                    // Dealer has blackjack
+                   
                     if (pBJ) {
-                        // Both have blackjack = push
+                      
                         h.result = 'push'; 
                         p.chips += h.bet;
                     } else {
-                        // Dealer BJ beats non-BJ hand
+                      
                         h.result = 'loss';
                     }
                 } else if (pBJ) {
-                    // Player blackjack, dealer doesn't have BJ
+                    
                     h.result = 'blackjack'; 
                     p.chips += h.bet + h.bet * CONFIG.BLACKJACK_PAYOUT; 
                     hasBJ = true; 
                     hasWin = true;
                 } else if (db) {
-                    // Dealer busted, player didn't
+                   
                     h.result = 'win'; 
                     p.chips += h.bet * 2; 
                     hasWin = true;
                 } else if (pt > dt) {
-                    // Player total higher
+                  
                     h.result = 'win'; 
                     p.chips += h.bet * 2; 
                     hasWin = true;
                 } else if (pt === dt) {
-                    // Same total = push
+                   
                     h.result = 'push'; 
                     p.chips += h.bet;
                 } else {
-                    // Dealer total higher
+                   
                     h.result = 'loss';
                 }
             }

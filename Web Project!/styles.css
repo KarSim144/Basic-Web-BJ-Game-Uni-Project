@@ -356,6 +356,8 @@
         .chip-50 { background: radial-gradient(circle at 30% 30%, #f5b041, #d68910); color: white; }
         .chip-100 { background: radial-gradient(circle at 30% 30%, #2c3e50, #1a252f); color: white; }
         .chip-500 { background: radial-gradient(circle at 30% 30%, #a569bd, #7d3c98); color: white; }
+        .chip-all-in { background: radial-gradient(circle at 30% 30%, #000000, #2c2b2b); color: #ffffff; font-size: 0.60em; }
+        
 
         .bet-actions { display: flex; gap: 6px; margin-top: 6px; }
         .bet-btn {
